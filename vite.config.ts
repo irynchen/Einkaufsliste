@@ -3,8 +3,12 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Bei Deployment auf GitHub Pages liegt die App unter /Einkaufsliste/ statt /.
+const base = process.env.GH_PAGES ? '/Einkaufsliste/' : '/';
+
 // https://vite.dev/config/
 export default defineConfig({
+  base,
   plugins: [
     react(),
     tailwindcss(),
@@ -12,7 +16,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/apple-touch-icon.png', 'splash/*.png'],
       manifest: {
-        id: '/',
+        id: base,
         name: 'Einkaufsliste',
         short_name: 'Einkaufsliste',
         description: 'Deine Einkaufsliste mit Kassenbon-Foto, Statistik und Budget – alles lokal auf deinem iPhone.',
@@ -21,18 +25,18 @@ export default defineConfig({
         display: 'standalone',
         display_override: ['standalone'],
         orientation: 'portrait',
-        start_url: '/',
-        scope: '/',
+        start_url: base,
+        scope: base,
         lang: 'de',
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: `${base}icons/icon-192.png`, sizes: '192x192', type: 'image/png' },
+          { src: `${base}icons/icon-512.png`, sizes: '512x512', type: 'image/png' },
+          { src: `${base}icons/icon-512.png`, sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: `${base}index.html`,
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === 'image',
