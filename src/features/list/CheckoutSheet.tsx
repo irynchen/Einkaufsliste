@@ -2,8 +2,10 @@ import { useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
 import Sheet from '../../components/Sheet';
+import Confetti from '../../components/Confetti';
 import type { ShoppingItem } from '../../types/models';
 import { formatCurrency } from '../../utils/format';
+import { vividGradient } from '../../utils/color';
 
 interface CheckoutSheetProps {
   open: boolean;
@@ -18,6 +20,7 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [store, setStore] = useState('');
+  const [celebrating, setCelebrating] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const knownStores = useLiveQuery(async () => {
@@ -74,14 +77,19 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
 
     await db.items.bulkDelete(checkedItems.map((i) => i.id));
 
-    setPrices({});
-    setPhoto(null);
-    setPhotoPreview(null);
-    setStore('');
+    setCelebrating(true);
     onClose();
+    window.setTimeout(() => {
+      setPrices({});
+      setPhoto(null);
+      setPhotoPreview(null);
+      setStore('');
+      setCelebrating(false);
+    }, 1100);
   };
 
   return (
+    <>
     <Sheet open={open} onClose={onClose} title="Einkauf abschließen">
       <div className="flex flex-col gap-4">
         <div>
@@ -126,9 +134,12 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
           ))}
         </ul>
 
-        <div className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 dark:bg-gray-800">
+        <div
+          className="flex items-center justify-between rounded-xl px-4 py-3"
+          style={{ backgroundColor: 'rgba(52, 199, 89, 0.10)' }}
+        >
           <span className="font-semibold">Gesamt</span>
-          <span className="text-lg font-bold text-ios-green">{formatCurrency(total)}</span>
+          <span className="text-lg font-extrabold text-ios-green">{formatCurrency(total)}</span>
         </div>
 
         <div>
@@ -162,11 +173,14 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
 
         <button
           onClick={handleConfirm}
-          className="mt-1 w-full rounded-xl bg-ios-green py-3.5 text-base font-semibold text-white"
+          className="mt-1 w-full rounded-xl py-3.5 text-base font-bold text-white shadow-md active:scale-[0.98] transition-transform"
+          style={{ backgroundImage: vividGradient('#34C759') }}
         >
-          Einkauf speichern
+          🎉 Einkauf speichern
         </button>
       </div>
     </Sheet>
+    <Confetti active={celebrating} />
+    </>
   );
 }

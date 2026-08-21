@@ -44,7 +44,10 @@ export default function RecurringSuggestionsBanner({ listId }: Props) {
   };
 
   return (
-    <div className="mx-4 mt-3 rounded-2xl border border-ios-blue/20 bg-ios-blue/5 p-4">
+    <div
+      className="mx-4 mt-3 rounded-2xl border border-ios-blue/15 p-4 shadow-sm"
+      style={{ backgroundImage: 'linear-gradient(120deg, rgba(0,122,255,0.08), rgba(90,200,250,0.05))' }}
+    >
       <div className="mb-2 flex items-center justify-between">
         <p className="text-sm font-semibold text-ios-blue">🔁 Wiederkehrende Artikel fällig</p>
         <button onClick={addAll} className="text-sm font-semibold text-ios-blue">

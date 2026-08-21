@@ -1,4 +1,5 @@
 import { formatCurrency } from '../utils/format';
+import { vividGradient } from '../utils/color';
 
 interface BudgetBarProps {
   spent: number;
@@ -7,10 +8,10 @@ interface BudgetBarProps {
 }
 
 export function budgetColor(ratio: number | null): string {
-  if (ratio === null) return 'bg-gray-300 dark:bg-gray-700';
-  if (ratio >= 1) return 'bg-ios-red';
-  if (ratio >= 0.8) return 'bg-ios-yellow';
-  return 'bg-ios-green';
+  if (ratio === null) return '#8E8E93';
+  if (ratio >= 1) return '#FF3B30';
+  if (ratio >= 0.8) return '#FFCC00';
+  return '#34C759';
 }
 
 export default function BudgetBar({ spent, limit, compact }: BudgetBarProps) {
@@ -19,24 +20,24 @@ export default function BudgetBar({ spent, limit, compact }: BudgetBarProps) {
   const pct = Math.min(ratio, 1) * 100;
 
   return (
-    <div className={compact ? '' : 'rounded-2xl bg-white p-3.5 shadow-sm dark:bg-[#1c1c1e]'}>
+    <div className={compact ? '' : 'glass rounded-2xl p-3.5 shadow-sm'}>
       {!compact && (
         <div className="mb-1.5 flex items-baseline justify-between">
-          <span className="text-lg font-bold">{formatCurrency(spent)}</span>
-          <span className="text-sm text-gray-400">
+          <span className="text-lg font-extrabold">{formatCurrency(spent)}</span>
+          <span className="text-sm font-medium text-gray-400">
             von {formatCurrency(limit)} · {Math.round(ratio * 100)}%
           </span>
         </div>
       )}
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+      <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200/70 dark:bg-gray-800">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${budgetColor(ratio)}`}
-          style={{ width: `${pct}%` }}
+          className="h-full rounded-full shadow-sm transition-all duration-700 ease-out"
+          style={{ width: `${pct}%`, backgroundImage: vividGradient(budgetColor(ratio), 90) }}
         />
       </div>
-      {ratio >= 1 && <p className="mt-1.5 text-xs font-semibold text-ios-red">⚠️ Budget überschritten</p>}
+      {ratio >= 1 && <p className="mt-1.5 text-xs font-bold text-ios-red">⚠️ Budget überschritten</p>}
       {ratio >= 0.8 && ratio < 1 && (
-        <p className="mt-1.5 text-xs font-semibold text-ios-orange">Budget fast ausgeschöpft</p>
+        <p className="mt-1.5 text-xs font-bold text-ios-orange">🔥 Budget fast ausgeschöpft</p>
       )}
     </div>
   );

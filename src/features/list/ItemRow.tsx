@@ -1,24 +1,30 @@
 import type { ShoppingItem } from '../../types/models';
 import SwipeableRow from '../../components/SwipeableRow';
 import { formatCurrency } from '../../utils/format';
+import { vividGradient } from '../../utils/color';
 
 interface ItemRowProps {
   item: ShoppingItem;
+  accentColor: string;
   onToggle: () => void;
   onDelete: () => void;
 }
 
-export default function ItemRow({ item, onToggle, onDelete }: ItemRowProps) {
+export default function ItemRow({ item, accentColor, onToggle, onDelete }: ItemRowProps) {
   return (
     <SwipeableRow onDelete={onDelete}>
       <button
         onClick={onToggle}
-        className="flex w-full items-center gap-3 bg-white px-4 py-3 text-left dark:bg-[#1c1c1e]"
+        className="flex w-full items-center gap-3 border-l-4 bg-white/90 px-3.5 py-3 text-left dark:bg-[#1c1c1e]/90"
+        style={{ borderLeftColor: item.checked ? 'transparent' : accentColor }}
       >
         <span
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-            item.checked ? 'border-ios-green bg-ios-green text-white' : 'border-gray-300 dark:border-gray-600'
-          }`}
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-white transition-all"
+          style={
+            item.checked
+              ? { backgroundImage: vividGradient('#34C759'), borderColor: 'transparent' }
+              : { borderColor: `${accentColor}88` }
+          }
         >
           {item.checked && '✓'}
         </span>

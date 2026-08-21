@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../../db/db';
 import { useActiveList } from '../../hooks/useActiveList';
 import { formatCurrency, formatDateTime } from '../../utils/format';
+import { vividGradient } from '../../utils/color';
 import type { Purchase } from '../../types/models';
 import ReceiptThumbnail from './ReceiptThumbnail';
 
@@ -47,7 +48,12 @@ export default function HistoryPage() {
   if (purchases.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 px-6 pt-20 text-center">
-        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-ios-blue/10 text-4xl">🧾</span>
+        <span
+          className="flex h-20 w-20 items-center justify-center rounded-full text-4xl shadow-lg"
+          style={{ backgroundImage: vividGradient('#007AFF') }}
+        >
+          🧾
+        </span>
         <p className="font-semibold text-gray-600 dark:text-gray-300">Noch keine abgeschlossenen Einkäufe</p>
         <p className="text-sm text-gray-400">Schließe einen Einkauf ab, um ihn hier zu sehen.</p>
       </div>
@@ -57,7 +63,7 @@ export default function HistoryPage() {
   return (
     <div className="flex flex-col gap-3 px-4 pt-3">
       {purchases.map((purchase) => (
-        <div key={purchase.id} className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-black/[0.03] dark:bg-[#1c1c1e] dark:ring-white/[0.04]">
+        <div key={purchase.id} className="glass rounded-2xl p-3 shadow-sm">
           <button
             onClick={() => setExpandedId((id) => (id === purchase.id ? null : purchase.id))}
             className="flex w-full items-center gap-3 text-left"
@@ -92,7 +98,8 @@ export default function HistoryPage() {
                   repeatPurchase(purchase);
                 }}
                 disabled={repeatingId === purchase.id}
-                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full bg-ios-green/10 py-2.5 text-sm font-semibold text-ios-green disabled:opacity-50"
+                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-full py-2.5 text-sm font-bold text-white shadow-sm active:scale-[0.98] transition-transform disabled:opacity-50"
+                style={{ backgroundImage: vividGradient('#34C759') }}
               >
                 🔁 {repeatingId === purchase.id ? 'Wird hinzugefügt…' : 'Nochmal kaufen'}
               </button>

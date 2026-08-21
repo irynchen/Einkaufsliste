@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { db } from '../../db/db';
 import { formatCurrency } from '../../utils/format';
+import { vividGradient } from '../../utils/color';
 import {
   periodRange,
   categoryTotals,
@@ -113,9 +114,10 @@ export default function StatsPage() {
           <button
             key={p.key}
             onClick={() => setPreset(p.key)}
-            className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium ${
-              preset === p.key ? 'bg-ios-green text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
+            className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-semibold transition-all ${
+              preset === p.key ? 'text-white shadow-sm' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
             }`}
+            style={preset === p.key ? { backgroundImage: vividGradient('#34C759') } : undefined}
           >
             {p.label}
           </button>
@@ -139,13 +141,16 @@ export default function StatsPage() {
         </div>
       )}
 
-      <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-[#1c1c1e]">
-        <p className="text-sm text-gray-400">Gesamtausgaben im Zeitraum</p>
-        <p className="text-2xl font-bold">{formatCurrency(totalSpent)}</p>
+      <div
+        className="rounded-2xl p-4 text-white shadow-lg"
+        style={{ backgroundImage: 'linear-gradient(135deg, #46E37F 0%, #34C759 55%, #17A83E 100%)' }}
+      >
+        <p className="text-sm font-medium text-white/85">Gesamtausgaben im Zeitraum</p>
+        <p className="text-3xl font-extrabold tracking-tight">{formatCurrency(totalSpent)}</p>
       </div>
 
       {catTotals.length > 0 && (
-        <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-[#1c1c1e]">
+        <div className="glass rounded-2xl p-4 shadow-sm">
           <p className="mb-2 font-semibold">Ausgaben pro Kategorie</p>
           <div style={{ width: '100%', height: 220 }}>
             <ResponsiveContainer>
@@ -179,7 +184,7 @@ export default function StatsPage() {
       )}
 
       {buckets.length > 0 && (
-        <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-[#1c1c1e]">
+        <div className="glass rounded-2xl p-4 shadow-sm">
           <p className="mb-2 font-semibold">Verlauf der Ausgaben</p>
           <div style={{ width: '100%', height: 200 }}>
             <ResponsiveContainer>
@@ -197,7 +202,7 @@ export default function StatsPage() {
 
       {(mostFrequent.length > 0 || mostExpensive.length > 0) && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-[#1c1c1e]">
+          <div className="glass rounded-2xl p-4 shadow-sm">
             <p className="mb-2 font-semibold">Häufigste Artikel</p>
             <ol className="flex flex-col gap-1.5 text-sm">
               {mostFrequent.map((i) => (
@@ -208,7 +213,7 @@ export default function StatsPage() {
               ))}
             </ol>
           </div>
-          <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-[#1c1c1e]">
+          <div className="glass rounded-2xl p-4 shadow-sm">
             <p className="mb-2 font-semibold">Teuerste Artikel</p>
             <ol className="flex flex-col gap-1.5 text-sm">
               {mostExpensive.map((i) => (
@@ -223,7 +228,7 @@ export default function StatsPage() {
       )}
 
       {priceComparison.length > 0 && (
-        <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-[#1c1c1e]">
+        <div className="glass rounded-2xl p-4 shadow-sm">
           <p className="mb-2 font-semibold">Preisvergleich nach Geschäft</p>
           <p className="mb-3 text-xs text-gray-400">
             Artikel, die du in mehreren Geschäften gekauft hast – günstigste Option zuerst.
@@ -265,7 +270,7 @@ export default function StatsPage() {
       )}
 
       {monthlyBudgetHistory.length > 0 && (
-        <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-[#1c1c1e]">
+        <div className="glass rounded-2xl p-4 shadow-sm">
           <p className="mb-2 font-semibold">Budget-Verlauf</p>
           <div style={{ width: '100%', height: 200 }}>
             <ResponsiveContainer>

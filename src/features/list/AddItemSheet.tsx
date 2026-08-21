@@ -6,6 +6,7 @@ import { UNITS, type RecurrenceInterval } from '../../types/models';
 import { INTERVAL_LABELS } from '../../utils/recurrence';
 import { useBudgetStatus } from '../../hooks/useBudget';
 import { formatCurrency } from '../../utils/format';
+import { vividGradient } from '../../utils/color';
 
 const BarcodeScanner = lazy(() => import('../../components/BarcodeScanner'));
 
@@ -188,12 +189,12 @@ export default function AddItemSheet({ open, onClose, listId }: AddItemSheetProp
                 type="button"
                 key={c.id}
                 onClick={() => setCategoryId(c.id)}
-                className={`flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-medium ${
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-semibold transition-all ${
                   activeCategoryId === c.id
-                    ? 'border-transparent text-white'
+                    ? 'border-transparent text-white shadow-sm scale-[1.03]'
                     : 'border-gray-200 text-gray-700 dark:border-gray-700 dark:text-gray-200'
                 }`}
-                style={activeCategoryId === c.id ? { backgroundColor: c.color } : undefined}
+                style={activeCategoryId === c.id ? { backgroundImage: vividGradient(c.color) } : undefined}
               >
                 <span>{c.icon}</span>
                 {c.name}
@@ -209,7 +210,8 @@ export default function AddItemSheet({ open, onClose, listId }: AddItemSheetProp
             role="switch"
             aria-checked={isRecurring}
             onClick={() => setIsRecurring((v) => !v)}
-            className={`h-7 w-12 rounded-full transition-colors ${isRecurring ? 'bg-ios-green' : 'bg-gray-300 dark:bg-gray-700'}`}
+            className={`h-7 w-12 rounded-full transition-colors ${isRecurring ? '' : 'bg-gray-300 dark:bg-gray-700'}`}
+            style={isRecurring ? { backgroundImage: vividGradient('#34C759') } : undefined}
           >
             <span
               className={`block h-6 w-6 translate-x-0.5 rounded-full bg-white shadow transition-transform ${
@@ -241,7 +243,8 @@ export default function AddItemSheet({ open, onClose, listId }: AddItemSheetProp
         <button
           type="submit"
           disabled={!name.trim()}
-          className="mt-2 w-full rounded-xl bg-ios-green py-3.5 text-base font-semibold text-white disabled:opacity-40"
+          className="mt-2 w-full rounded-xl py-3.5 text-base font-bold text-white shadow-md active:scale-[0.98] transition-transform disabled:opacity-40"
+          style={{ backgroundImage: vividGradient('#34C759') }}
         >
           Hinzufügen
         </button>
