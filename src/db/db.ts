@@ -7,6 +7,7 @@ import {
   type Purchase,
   type RecurringRule,
   type Budget,
+  type BarcodeEntry,
   DEFAULT_CATEGORIES,
 } from '../types/models';
 
@@ -18,6 +19,7 @@ class EinkaufslisteDB extends Dexie {
   purchases!: Table<Purchase, string>;
   recurringRules!: Table<RecurringRule, string>;
   budgets!: Table<Budget, string>;
+  barcodeCatalog!: Table<BarcodeEntry, string>;
 
   constructor() {
     super('einkaufsliste-db');
@@ -29,6 +31,9 @@ class EinkaufslisteDB extends Dexie {
       purchases: 'id, listId, date',
       recurringRules: 'id, listId, active',
       budgets: 'id, listId',
+    });
+    this.version(2).stores({
+      barcodeCatalog: 'barcode',
     });
   }
 }

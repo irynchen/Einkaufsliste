@@ -54,8 +54,17 @@ export interface ShoppingItem {
   checked: boolean;
   price?: number; // geschätzter oder tatsächlicher Preis
   recurringRuleId?: RecurringRuleId;
+  barcode?: string;
   createdAt: number;
   checkedAt?: number;
+}
+
+/** Lokal gelernte Zuordnung Barcode -> Artikeldaten (aus vorherigen Scans) */
+export interface BarcodeEntry {
+  barcode: string;
+  name: string;
+  categoryId: CategoryId;
+  unit: string;
 }
 
 /** Foto eines Kassenbons, einem Einkauf zugeordnet */
@@ -73,6 +82,7 @@ export interface Purchase {
   listName: string;
   date: number;
   totalAmount: number;
+  store?: string;
   items: PurchasedItem[];
 }
 
@@ -82,6 +92,7 @@ export interface PurchasedItem {
   unit: string;
   categoryId: CategoryId;
   price: number;
+  barcode?: string;
 }
 
 /** Budget - global oder pro Liste, optional pro Kategorie aufgeschlüsselt */

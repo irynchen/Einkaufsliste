@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
 import Sheet from '../../components/Sheet';
 import type { ShoppingItem } from '../../types/models';
@@ -16,7 +17,13 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [store, setStore] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const knownStores = useLiveQuery(async () => {
+    const purchases = await db.purchases.toArray();
+    return Array.from(new Set(purchases.map((p) => p.store).filter((s): s is string => !!s))).sort();
+  }, []) ?? [];
 
   const priceFor = (item: ShoppingItem) => prices[item.id] ?? (item.price != null ? String(item.price) : '');
 
@@ -45,12 +52,14 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
       listName,
       date: Date.now(),
       totalAmount: total,
+      store: store.trim() || undefined,
       items: checkedItems.map((item) => ({
         name: item.name,
         quantity: item.quantity,
         unit: item.unit,
         categoryId: item.categoryId,
         price: parseFloat((priceFor(item) || '0').replace(',', '.')) || 0,
+        barcode: item.barcode,
       })),
     });
 
@@ -68,12 +77,31 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
     setPrices({});
     setPhoto(null);
     setPhotoPreview(null);
+    setStore('');
     onClose();
   };
 
   return (
     <Sheet open={open} onClose={onClose} title="Einkauf abschließen">
       <div className="flex flex-col gap-4">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-500 dark:text-gray-400">
+            Geschäft (optional, für Preisvergleich)
+          </label>
+          <input
+            list="known-stores"
+            value={store}
+            onChange={(e) => setStore(e.target.value)}
+            placeholder="z.B. Rewe, Edeka, Aldi"
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base outline-none focus:border-ios-green dark:border-gray-700 dark:bg-gray-800"
+          />
+          <datalist id="known-stores">
+            {knownStores.map((s) => (
+              <option key={s} value={s} />
+            ))}
+          </datalist>
+        </div>
+
         <ul className="divide-y divide-gray-100 dark:divide-gray-800">
           {checkedItems.map((item) => (
             <li key={item.id} className="flex items-center gap-3 py-2.5">

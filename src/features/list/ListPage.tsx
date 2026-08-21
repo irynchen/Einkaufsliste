@@ -56,23 +56,30 @@ export default function ListPage() {
       <RecurringSuggestionsBanner listId={activeListId} />
 
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 px-6 pt-24 text-center text-gray-400">
-          <span className="text-4xl">🛒</span>
-          <p className="font-medium">Diese Liste ist leer</p>
-          <p className="text-sm">Tippe auf + um Artikel hinzuzufügen.</p>
+        <div className="flex flex-col items-center justify-center gap-3 px-6 pt-20 text-center">
+          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-ios-green/10 text-4xl">
+            🛒
+          </span>
+          <p className="font-semibold text-gray-600 dark:text-gray-300">Diese Liste ist leer</p>
+          <p className="text-sm text-gray-400">Tippe auf + um Artikel hinzuzufügen.</p>
         </div>
       ) : (
         <div className="mt-3 flex flex-col gap-4">
           {groups.map(({ category, items: groupItems }) => (
             <div key={category.id} className="px-4">
               <div className="mb-1.5 flex items-center gap-1.5 px-1">
-                <span>{category.icon}</span>
+                <span
+                  className="flex h-5 w-5 items-center justify-center rounded-full text-xs"
+                  style={{ backgroundColor: `${category.color}22` }}
+                >
+                  {category.icon}
+                </span>
                 <h3 className="text-sm font-semibold" style={{ color: category.color }}>
                   {category.name}
                 </h3>
                 <span className="text-xs text-gray-400">{groupItems.length}</span>
               </div>
-              <div className="overflow-hidden rounded-2xl divide-y divide-gray-100 dark:divide-gray-800">
+              <div className="overflow-hidden rounded-2xl divide-y divide-gray-100 shadow-sm dark:divide-gray-800">
                 {groupItems.map((item) => (
                   <ItemRow
                     key={item.id}
@@ -95,14 +102,14 @@ export default function ListPage() {
         {checkedItems.length > 0 && (
           <button
             onClick={() => setCheckoutOpen(true)}
-            className="flex-1 max-w-xs rounded-full bg-ios-blue py-3.5 text-center text-sm font-semibold text-white shadow-lg"
+            className="max-w-xs flex-1 rounded-full bg-ios-blue py-3.5 text-center text-sm font-semibold text-white shadow-[0_6px_16px_-4px_rgba(0,122,255,0.5)] active:scale-[0.98] transition-transform"
           >
             ✅ Einkauf abschließen ({checkedItems.length})
           </button>
         )}
         <button
           onClick={() => setAddOpen(true)}
-          className={`flex h-14 w-14 items-center justify-center rounded-full bg-ios-green text-2xl text-white shadow-lg ${
+          className={`flex h-14 w-14 items-center justify-center rounded-full bg-ios-green text-2xl text-white shadow-[0_6px_16px_-4px_rgba(52,199,89,0.6)] active:scale-95 transition-transform ${
             checkedItems.length > 0 ? '' : 'mx-auto'
           }`}
           aria-label="Artikel hinzufügen"

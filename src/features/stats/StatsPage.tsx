@@ -16,7 +16,14 @@ import {
 } from 'recharts';
 import { db } from '../../db/db';
 import { formatCurrency } from '../../utils/format';
-import { periodRange, categoryTotals, bucketTotals, topItems, type PeriodPreset } from '../../utils/stats';
+import {
+  periodRange,
+  categoryTotals,
+  bucketTotals,
+  topItems,
+  storePriceComparison,
+  type PeriodPreset,
+} from '../../utils/stats';
 
 const PRESETS: { key: PeriodPreset; label: string }[] = [
   { key: '7d', label: '7 Tage' },
@@ -59,6 +66,10 @@ export default function StatsPage() {
   const granularity = preset === '1y' ? 'month' : 'week';
   const buckets = useMemo(() => bucketTotals(purchases, granularity), [purchases, granularity]);
   const { mostFrequent, mostExpensive } = useMemo(() => topItems(purchases), [purchases]);
+  const priceComparison = useMemo(
+    () => storePriceComparison(allPurchasesForBudgetHistory),
+    [allPurchasesForBudgetHistory],
+  );
 
   const monthlyBudgetHistory = useMemo(() => {
     if (!budget) return [];
@@ -208,6 +219,48 @@ export default function StatsPage() {
               ))}
             </ol>
           </div>
+        </div>
+      )}
+
+      {priceComparison.length > 0 && (
+        <div className="rounded-2xl bg-white p-4 shadow-sm dark:bg-[#1c1c1e]">
+          <p className="mb-2 font-semibold">Preisvergleich nach Geschäft</p>
+          <p className="mb-3 text-xs text-gray-400">
+            Artikel, die du in mehreren Geschäften gekauft hast – günstigste Option zuerst.
+          </p>
+          <ul className="flex flex-col gap-3">
+            {priceComparison.slice(0, 8).map((c) => (
+              <li key={`${c.name}__${c.unit}`} className="rounded-xl bg-gray-50 p-3 dark:bg-gray-800">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="font-medium">{c.name}</span>
+                  {c.savingsPct > 0 && (
+                    <span className="rounded-full bg-ios-green/15 px-2 py-0.5 text-xs font-semibold text-ios-green">
+                      bis zu {c.savingsPct.toFixed(0)}% sparen
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1">
+                  {c.entries.map((e) => (
+                    <div key={e.store} className="flex items-center justify-between text-sm">
+                      <span
+                        className={
+                          e.store === c.cheapest.store
+                            ? 'font-medium text-ios-green'
+                            : 'text-gray-500 dark:text-gray-400'
+                        }
+                      >
+                        {e.store === c.cheapest.store && '✓ '}
+                        {e.store}
+                      </span>
+                      <span className={e.store === c.cheapest.store ? 'font-semibold text-ios-green' : 'text-gray-500 dark:text-gray-400'}>
+                        {formatCurrency(e.price)} / {c.unit}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

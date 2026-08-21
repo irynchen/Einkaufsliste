@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../../db/db';
 import Sheet from '../../components/Sheet';
@@ -6,6 +6,8 @@ import { UNITS, type RecurrenceInterval } from '../../types/models';
 import { INTERVAL_LABELS } from '../../utils/recurrence';
 import { useBudgetStatus } from '../../hooks/useBudget';
 import { formatCurrency } from '../../utils/format';
+
+const BarcodeScanner = lazy(() => import('../../components/BarcodeScanner'));
 
 interface AddItemSheetProps {
   open: boolean;
@@ -25,6 +27,23 @@ export default function AddItemSheet({ open, onClose, listId }: AddItemSheetProp
   const [price, setPrice] = useState('');
   const [isRecurring, setIsRecurring] = useState(false);
   const [interval, setInterval] = useState<RecurrenceInterval>('weekly');
+  const [barcode, setBarcode] = useState<string | null>(null);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanHint, setScanHint] = useState<string | null>(null);
+
+  const handleDetected = async (code: string) => {
+    setScannerOpen(false);
+    setBarcode(code);
+    const known = await db.barcodeCatalog.get(code);
+    if (known) {
+      setName(known.name);
+      setUnit(known.unit);
+      setCategoryId(known.categoryId);
+      setScanHint(`Bekannter Artikel erkannt: ${known.name}`);
+    } else {
+      setScanHint('Neuer Barcode – bitte Artikel einmal benennen, danach wird er gemerkt.');
+    }
+  };
 
   const activeCategoryId = categoryId || categories[0]?.id || '';
   const priceNum = parseFloat(price.replace(',', '.')) || 0;
@@ -39,6 +58,8 @@ export default function AddItemSheet({ open, onClose, listId }: AddItemSheetProp
     setPrice('');
     setIsRecurring(false);
     setInterval('weekly');
+    setBarcode(null);
+    setScanHint(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,8 +92,13 @@ export default function AddItemSheet({ open, onClose, listId }: AddItemSheetProp
       checked: false,
       price: priceNum > 0 ? priceNum : undefined,
       recurringRuleId,
+      barcode: barcode ?? undefined,
       createdAt: Date.now(),
     });
+
+    if (barcode) {
+      await db.barcodeCatalog.put({ barcode, name: name.trim(), categoryId: activeCategoryId, unit });
+    }
 
     reset();
     onClose();
@@ -83,13 +109,24 @@ export default function AddItemSheet({ open, onClose, listId }: AddItemSheetProp
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-500 dark:text-gray-400">Artikel</label>
-          <input
-            autoFocus
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="z.B. Bananen"
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base outline-none focus:border-ios-green dark:border-gray-700 dark:bg-gray-800"
-          />
+          <div className="flex gap-2">
+            <input
+              autoFocus
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="z.B. Bananen"
+              className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-base outline-none focus:border-ios-green dark:border-gray-700 dark:bg-gray-800"
+            />
+            <button
+              type="button"
+              onClick={() => setScannerOpen(true)}
+              aria-label="Barcode scannen"
+              className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-xl dark:border-gray-700 dark:bg-gray-800"
+            >
+              📷
+            </button>
+          </div>
+          {scanHint && <p className="mt-1.5 text-xs text-gray-400">{scanHint}</p>}
         </div>
 
         <div className="flex gap-3">
@@ -209,6 +246,11 @@ export default function AddItemSheet({ open, onClose, listId }: AddItemSheetProp
           Hinzufügen
         </button>
       </form>
+      {scannerOpen && (
+        <Suspense fallback={null}>
+          <BarcodeScanner open={scannerOpen} onClose={() => setScannerOpen(false)} onDetected={handleDetected} />
+        </Suspense>
+      )}
     </Sheet>
   );
 }

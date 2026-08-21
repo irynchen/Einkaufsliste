@@ -1,5 +1,57 @@
 import type { Purchase } from '../types/models';
 
+export interface StorePriceEntry {
+  store: string;
+  price: number;
+  date: number;
+}
+
+export interface StorePriceComparison {
+  name: string;
+  unit: string;
+  entries: StorePriceEntry[]; // pro Geschäft die jeweils zuletzt bezahlte Stückpreis, sortiert aufsteigend
+  cheapest: StorePriceEntry;
+  mostExpensive: StorePriceEntry;
+  savingsPct: number; // wie viel % man beim teuersten Geschäft mehr zahlt ggü. dem günstigsten
+}
+
+/** Vergleicht Stückpreise desselben Artikels über verschiedene Geschäfte hinweg. */
+export function storePriceComparison(purchases: Purchase[]): StorePriceComparison[] {
+  const byItem = new Map<string, { name: string; unit: string; byStore: Map<string, StorePriceEntry> }>();
+
+  for (const p of purchases) {
+    if (!p.store) continue;
+    for (const item of p.items) {
+      if (item.price <= 0) continue;
+      const key = `${item.name.trim().toLowerCase()}__${item.unit}`;
+      if (!byItem.has(key)) byItem.set(key, { name: item.name.trim(), unit: item.unit, byStore: new Map() });
+      const group = byItem.get(key)!;
+      const existing = group.byStore.get(p.store);
+      if (!existing || p.date > existing.date) {
+        group.byStore.set(p.store, { store: p.store, price: item.price, date: p.date });
+      }
+    }
+  }
+
+  const result: StorePriceComparison[] = [];
+  for (const group of byItem.values()) {
+    if (group.byStore.size < 2) continue;
+    const entries = Array.from(group.byStore.values()).sort((a, b) => a.price - b.price);
+    const cheapest = entries[0];
+    const mostExpensive = entries[entries.length - 1];
+    result.push({
+      name: group.name,
+      unit: group.unit,
+      entries,
+      cheapest,
+      mostExpensive,
+      savingsPct: cheapest.price > 0 ? ((mostExpensive.price - cheapest.price) / cheapest.price) * 100 : 0,
+    });
+  }
+
+  return result.sort((a, b) => b.savingsPct - a.savingsPct);
+}
+
 export type PeriodPreset = '7d' | '30d' | '1y' | 'custom';
 
 export function periodRange(preset: PeriodPreset, customFrom?: number, customTo?: number): { from: number; to: number } {

@@ -16,10 +16,15 @@ export default function ListSwitcher() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 dark:bg-gray-800"
+        className="flex items-center gap-2 rounded-full bg-gray-100 py-1.5 pl-1.5 pr-3 shadow-sm active:scale-[0.97] dark:bg-gray-800 transition-transform"
       >
-        <span className="text-lg leading-none">{activeList?.icon ?? '🛒'}</span>
-        <span className="max-w-[45vw] truncate text-base font-semibold">{activeList?.name ?? 'Liste wählen'}</span>
+        <span
+          className="flex h-7 w-7 items-center justify-center rounded-full text-base leading-none"
+          style={{ backgroundColor: `${activeList?.color ?? '#34C759'}22` }}
+        >
+          {activeList?.icon ?? '🛒'}
+        </span>
+        <span className="max-w-[42vw] truncate text-base font-semibold">{activeList?.name ?? 'Liste wählen'}</span>
         <span className="text-xs text-gray-400">▾</span>
       </button>
 
