@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+
+  --color-ios-green: #34c759;
+  --color-ios-blue: #007aff;
+  --color-ios-red: #ff3b30;
+  --color-ios-orange: #ff9500;
+  --color-ios-yellow: #ffcc00;
+  --color-ios-gray: #8e8e93;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply text-gray-900 dark:text-gray-50;
+  background-color: #f5f3ee;
+  background-image:
+    radial-gradient(720px circle at 8% -6%, rgba(52, 199, 89, 0.16), transparent 55%),
+    radial-gradient(680px circle at 108% 8%, rgba(255, 149, 0, 0.14), transparent 55%),
+    radial-gradient(620px circle at 50% 115%, rgba(0, 122, 255, 0.10), transparent 55%);
+  background-attachment: fixed;
+  overscroll-behavior-y: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #0b0b0d;
+    background-image:
+      radial-gradient(720px circle at 8% -6%, rgba(52, 199, 89, 0.14), transparent 55%),
+      radial-gradient(680px circle at 108% 8%, rgba(255, 149, 0, 0.12), transparent 55%),
+      radial-gradient(620px circle at 50% 115%, rgba(0, 122, 255, 0.12), transparent 55%);
+  }
+}
+
+.glass {
+  @apply border border-white/60 bg-white/75 backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.06];
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -10px, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift, 0px), 340px, 0) rotate(var(--spin, 540deg)) scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+* {
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea,
+button {
+  font-family: inherit;
+}
