@@ -46,6 +46,17 @@ export default defineConfig({
               expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
+          {
+            // Kassenbon-OCR (Tesseract.js) lädt Sprachmodell + WASM-Core beim ersten Einsatz
+            // von jsdelivr nach – danach per Service Worker gecacht, damit es offline nutzbar bleibt.
+            urlPattern: ({ url }) => url.hostname === 'cdn.jsdelivr.net',
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'ocr-model-cache',
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
         ],
       },
       devOptions: {

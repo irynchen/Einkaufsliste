@@ -21,6 +21,8 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [store, setStore] = useState('');
   const [celebrating, setCelebrating] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrMessage, setOcrMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const knownStores = useLiveQuery(async () => {
@@ -45,6 +47,41 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
     if (!file) return;
     setPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
+    setOcrMessage(null);
+  };
+
+  const handleScanReceipt = async () => {
+    if (!photo) return;
+    setOcrLoading(true);
+    setOcrMessage(null);
+    try {
+      const { scanReceiptImage, matchReceiptLines } = await import('../../utils/receiptOcr');
+      const result = await scanReceiptImage(photo);
+
+      if (result.store && !store.trim()) setStore(result.store);
+
+      const matches = matchReceiptLines(checkedItems, result.lines);
+      const matchedCount = Object.keys(matches).length;
+      if (matchedCount > 0) {
+        setPrices((prev) => {
+          const next = { ...prev };
+          for (const [itemId, price] of Object.entries(matches)) {
+            if (!next[itemId]) next[itemId] = String(price).replace('.', ',');
+          }
+          return next;
+        });
+      }
+
+      setOcrMessage(
+        matchedCount > 0
+          ? `✅ ${matchedCount} von ${checkedItems.length} Preisen erkannt – bitte prüfen.`
+          : 'Keine passenden Preise erkannt. Bitte manuell eintragen.',
+      );
+    } catch {
+      setOcrMessage('⚠️ Erkennung fehlgeschlagen (beim ersten Mal wird eine Internetverbindung benötigt).');
+    } finally {
+      setOcrLoading(false);
+    }
   };
 
   const handleConfirm = async () => {
@@ -84,6 +121,7 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
       setPhoto(null);
       setPhotoPreview(null);
       setStore('');
+      setOcrMessage(null);
       setCelebrating(false);
     }, 1100);
   };
@@ -152,14 +190,25 @@ export default function CheckoutSheet({ open, onClose, listId, listName, checked
             onChange={handlePhotoChange}
           />
           {photoPreview ? (
-            <div className="relative">
-              <img src={photoPreview} alt="Kassenbon" className="w-full rounded-xl object-cover" style={{ maxHeight: 220 }} />
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <img src={photoPreview} alt="Kassenbon" className="w-full rounded-xl object-cover" style={{ maxHeight: 220 }} />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-2 right-2 rounded-full bg-black/60 px-3 py-1.5 text-sm font-medium text-white"
+                >
+                  Neu aufnehmen
+                </button>
+              </div>
               <button
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-2 right-2 rounded-full bg-black/60 px-3 py-1.5 text-sm font-medium text-white"
+                type="button"
+                onClick={handleScanReceipt}
+                disabled={ocrLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-ios-blue/40 py-3 text-sm font-semibold text-ios-blue disabled:opacity-60"
               >
-                Neu aufnehmen
+                {ocrLoading ? '🔍 Erkenne Text…' : '🔍 Preise & Geschäft automatisch auslesen'}
               </button>
+              {ocrMessage && <p className="text-xs text-gray-500 dark:text-gray-400">{ocrMessage}</p>}
             </div>
           ) : (
             <button
